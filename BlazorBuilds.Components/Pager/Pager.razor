@@ -1,0 +1,126 @@
+﻿<nav class="@GlobalValues.Pager_Class" aria-label="@AriaPagerLabel" data-static="@GlobalValues.GetStyleAsValue(StyleAs)">
+
+    @if (DisplayInfo != PagerInfoDisplay.None)
+    {
+        <span id="@_liveRegionID" class="@GlobalValues.Pager_Information_Class" role="@(DisplayInfo == PagerInfoDisplay.WithAnnouncement ? "status" : null)">
+            @_pagerInformation
+        </span>
+    }
+
+    <ul class="@GlobalValues.Pager_Buttons_Class">
+        @{
+            var inputboxKey     = "input-box";
+            var nextItemKey     = "next-item";
+            var previousItemKey = "previous-item";
+        }
+        @if (true == ShowInputBox)
+        {
+            <li @key="inputboxKey" class="@GlobalValues.Pager_Controls_Class">
+                <label for="@_inputID" class="@GlobalValues.Pager_Label_Class">@_inputLabel</label>
+                <input id="@_inputID" class="@GlobalValues.Pager_Input_Class" type="text" maxlength="@ItemCount.ToString().Length.ToString()"
+                aria-description="@_ariaInputDescription" autocomplete="off" readonly="@(_currentPage < 1 ? true : false)"
+                @bind-value:get="_inputNumber" @bind-value:event="oninput" @onkeydown:stopPropagation @onkeydown="(EventArgs) => HandleInputKeyDown(EventArgs,_currentPage,_lastPage)" />
+            </li>
+        }
+
+        <li @key="previousItemKey">
+           
+            @if(NavigationType == PagerNavType.Link)
+            {
+                var pageNumber = _currentPage > 1 ? _currentPage - 1 : 1;
+                <a class="@GlobalValues.Pager_Button_Class" @onclick="() => RequestedPage(_currentPage, _currentPage - 1, _lastPage, false)" 
+                    aria-disabled="@(_currentPage <= 1 ? "true" : "false")">
+                    <span class="@GlobalValues.Pager_Icon_Class @GlobalValues.Pager_Prev_Icon_Name_Class" aria-hidden="true"></span>
+                    <span>@_previousLabel</span>
+                </a>
+            }
+            else
+            {
+                <button class="@GlobalValues.Pager_Button_Class" @onclick="() => RequestedPage(_currentPage, _currentPage - 1, _lastPage, false)" type="button" 
+                    aria-disabled="@(_currentPage <= 1 ? "true" : "false")">
+                    <span class="@GlobalValues.Pager_Icon_Class @GlobalValues.Pager_Prev_Icon_Name_Class" aria-hidden="true"></span>
+                    <span>@_previousLabel</span>
+                </button>
+            }
+        </li>
+
+        @if (DisplaySize == PagerDisplaySize.Compact)
+        {
+            <li class="@GlobalValues.Pager_Counter_Class">@_currentPage &nbsp; / &nbsp; @_lastPage</li>
+        }
+        else
+        {
+            var buttonClasses = GetButtonClasses(ButtonStyle);
+
+            @for (int index = 1; index <= _pageSlots; index++)
+            {
+
+                var pageNumber    = GetPageNumber(_pageSlots, index, _currentPage, _lastPage);
+                var isCurrentPage = pageNumber == _currentPage;
+                var itemIndex     = index;
+
+                @if (pageNumber < 1)
+                {
+                    <li @key="@($"page-{pageNumber}")" class="@buttonClasses" aria-label="@_ariaEllipseLabel" aria-disabled="true">&#8230</li>
+                    continue;
+                }
+                @if (true == isCurrentPage)
+                {
+                    <!-- Wanted to use a single span for both nav types instead of the if else but narrator would add the word "group" to the announcements when I did this-->
+                    <li @key="pageNumber">
+                        @if (NavigationType == PagerNavType.Button)
+                        {
+                            <button @ref="CurrentPageRef" class="@buttonClasses" aria-current="page" type="button">
+                                @pageNumber
+                            </button>
+                        }
+                        else
+                        {
+                            <a @ref="CurrentPageRef" href="@UpdateUriQueryParams(pageNumber)" class="@buttonClasses" @onclick:preventDefault aria-current="page">
+                                @pageNumber
+                            </a>
+                        }
+                    </li>
+                    continue;
+                }
+
+                <li @key="pageNumber">
+                    @if (NavigationType == PagerNavType.Button)
+                    {
+                        <button class="@buttonClasses" @onclick="() => RequestedPage(_currentPage,pageNumber, _lastPage)" type="button">
+                            @pageNumber
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@UpdateUriQueryParams(pageNumber)" class="@buttonClasses" @onclick:preventDefault @onclick="() => RequestedPage(_currentPage,pageNumber, _lastPage)">
+                            @pageNumber
+                        </a>
+                    }
+                </li>
+
+            }
+        }
+
+        <li @key="nextItemKey">
+            @if(NavigationType == PagerNavType.Link)
+            {
+                var pageNumber = _currentPage < _lastPage ? _currentPage + 1 : _lastPage;
+                <a href="@UpdateUriQueryParams(pageNumber)" class="@GlobalValues.Pager_Button_Class" @onclick:preventDefault @onclick="() => RequestedPage(_currentPage,pageNumber, _lastPage, false)" 
+                    aria-disabled="@(_currentPage >= _lastPage ? "true" : "false")">
+                    <span>@_nextLabel</span>
+                    <span class="@GlobalValues.Pager_Icon_Class @GlobalValues.Pager_Next_Icon_Name_Class" aria-hidden="true"></span>
+                </a>
+            }
+            else
+            {
+                <button class="@GlobalValues.Pager_Button_Class" @onclick="() => RequestedPage(_currentPage, _currentPage + 1, _lastPage, false)" 
+                    aria-disabled="@(_currentPage >= _lastPage ? "true" : "false")" type="button">
+                    <span>@_nextLabel</span>
+                    <span class="@GlobalValues.Pager_Icon_Class @GlobalValues.Pager_Next_Icon_Name_Class" aria-hidden="true"></span>
+                </button>
+            }
+        </li>
+
+    </ul>
+</nav>

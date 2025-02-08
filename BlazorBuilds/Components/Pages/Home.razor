@@ -1,0 +1,69 @@
+﻿@inject NavigationManager _navigationManager
+@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, <span style="text-decoration:line-through">world!</span>Accessible Paging Component!</h1>
+
+<p>Below just shows the pager with its different size options, navigation item style, buttons or link, shape, square or round and whether or not to 
+    show the Go to page input. Not shown are the options for the aria information to control what is read out by screen readers, which is discussed during the video.
+    The previous and next actions are always buttons, the numbered items can be links instead so you can open in new page or save as favourite etc.
+</p>
+<p>
+    All the pagers are bound to the same item count and current page variables.
+</p>
+<p class="fst-italic">The largest pager with the go to page input, previous and next buttons with a spread of 9 items, using the round style and links.</p>
+
+<Pager AriaPagerLabel="Large results pager" ItemCount="@itemCount" ItemsPerPage="5" TotalItemCount="@itemCount" NavigationType="PagerNavType.Link"
+       DisplaySize="PagerDisplaySize.Large" ButtonStyle="PagerButtonStyle.Round" ShowInputBox="true" CurrentPage="@_currentPage" CurrentPageChanged="HandleOnPageChangeEvent" />
+
+<p class="mb-3 mt-5 fst-italic">Pager size set to medium without the go to page, has the previous and next buttons with a spread of 7 items, using the square style and buttons </p>
+
+<Pager AriaPagerLabel="Medium results pager" DisplayInfo="PagerInfoDisplay.WithoutAnnouncement" ItemCount="@itemCount" ItemsPerPage="5" TotalItemCount="@itemCount" NavigationType="PagerNavType.Button"
+DisplaySize="PagerDisplaySize.Medium" ButtonStyle="PagerButtonStyle.Square" ShowInputBox="false" CurrentPage="@_currentPage" CurrentPageChanged="HandleOnPageChangeEvent" />
+
+<p class="mb-3 mt-5 fst-italic">Pager Pager size set to compact with the go to page.</p>
+
+<Pager AriaPagerLabel="Compact results pager" DisplayInfo="PagerInfoDisplay.WithoutAnnouncement" ItemCount="@itemCount" ItemsPerPage="5" TotalItemCount="@itemCount" NavigationType="PagerNavType.Button"
+DisplaySize="PagerDisplaySize.Compact" ShowInputBox="true" CurrentPage="@_currentPage" CurrentPageChanged="HandleOnPageChangeEvent" />
+
+<p class="mb-3 mt-5 fst-italic">Pager set to compact</p> 
+
+<Pager AriaPagerLabel="Compact results pager" DisplayInfo="PagerInfoDisplay.WithoutAnnouncement" ItemCount="@itemCount" ItemsPerPage="5" TotalItemCount="@itemCount" NavigationType="PagerNavType.Button"
+DisplaySize="PagerDisplaySize.Compact" ButtonStyle="PagerButtonStyle.Square" ShowInputBox="false" @bind-CurrentPage="@_currentPage" />
+
+
+@code{
+    // [Parameter]
+    // [SupplyParameterFromQuery(Name = "page")]
+    // private int? PageNumber { get; set; }
+
+    /*
+        * The above will get the query string page value on every page number change and trigger the OnParameterSet so you could use that to check it
+        * instead of the HandleOnPageChangeEvent and use the @bind:CurrentPage syntax for two binding.
+        * 
+        * Or if its a one time thing check the query string on initiliazation and use event as normal etc
+     */
+
+    public  int itemCount    = 50000;
+    private int _currentPage = 1;
+
+    private async Task HandleOnPageChangeEvent(int value)
+    {
+        _currentPage = value;
+        await Task.CompletedTask;
+    }
+
+    protected override void OnInitialized()
+    {
+        //One time thing
+        var pageValue = HttpUtility.ParseQueryString(new Uri(_navigationManager.Uri).Query).Get("page"); 
+        _currentPage = int.TryParse(pageValue, out int number) ? number : 1;
+    }
+
+    protected override void OnParametersSet()
+    {
+        //Get PageNumber value from uncommented Parameter do stuff and make sure CurrentPage is in sync / updated.
+        base.OnParametersSet();
+    }
+}

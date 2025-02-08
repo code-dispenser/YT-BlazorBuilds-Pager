@@ -1,0 +1,13 @@
+﻿:root {
+    --fs-label: 0.875rem;
+    --control-label-text-clr: #00001A;
+    --control-focus-clr: #000080;
+    --control-focus-clr-rgb-val: 0,0,128;
+    --control-selection-clr: #4D4DA6;
+    --control-selection-text-clr: #FFFFFF;
+}
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}

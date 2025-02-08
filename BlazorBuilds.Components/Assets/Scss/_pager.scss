@@ -1,0 +1,132 @@
+﻿.pager {
+    --_hover-bg-clr: rgba(var(--control-focus-clr-rgb-val),0.1);
+    --_focus-border-clr: rgba(var(--control-focus-clr-rgb-val),0.5);
+    --_min-target-size: 30px;
+    --_readonly-disabled: grey;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: var(--fs-label);
+    color: var(--control-label-text-clr);
+
+    & > *:only-child { //push buttons to the right when there is no information span
+        margin-left: auto;
+    }
+
+    & a {
+        color: inherit;
+    }
+
+    & ul, li {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        color: inherit;
+    }
+
+    &__label {
+        align-self: center;
+    }
+
+    &__controls {
+        display: inline-flex;
+        white-space: nowrap;
+
+        &:has(.pager__label + input[readonly]) {
+            color: var(--_readonly-disabled);
+            cursor: not-allowed;
+        }
+    }
+
+    &__input {
+        all: unset;
+        border-bottom: 1px solid var(--_focus-border-clr);
+        align-self: center;
+        width: 6ch;
+        text-align: right;
+        color: inherit;
+
+        &[readonly] {
+            border-bottom: 1px solid var(--_readonly-disabled);
+        }
+    }
+
+    &__counter {
+        align-self: center;
+    }
+
+    &__buttons {
+        align-items: center;
+        display: inline-flex;
+        border: none;
+        gap: 0.25rem;
+        border: none;
+        outline: none;
+    }
+
+    &__button {
+        all: unset;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        min-height: var(--_min-target-size);
+        min-width: var(--_min-target-size);
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.250rem;
+        flex-shrink: 0;
+        border-radius: 0.25rem;
+
+        &--round {
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+        }
+
+        &--square {
+            aspect-ratio: 1/1;
+        }
+
+        &[aria-current="page"] {
+            background-color: var(--control-selection-clr);
+            color: var(--control-selection-text-clr);
+        }
+
+        &[aria-disabled="true"] {
+            cursor: not-allowed;
+            color: var(--_readonly-disabled);
+        }
+
+        &:hover:not([aria-disabled=true]):not([aria-current="page"]) {
+            background-color: var(--_hover-bg-clr);
+        }
+
+        &:focus:not([aria-disabled="true"]):not([aria-current="page"]) {
+            background-color: var(--_hover-bg-clr);
+        }
+
+        &:focus[aria-current="page"] {
+            outline-offset: 1px;
+        }
+
+        &:focus {
+            outline: 2px solid var(--_focus-border-clr);
+        }
+    }
+
+    &__information {
+        color: inherit;
+    }
+
+    &__icon {
+        font-size: 1.75rem;
+        color: inherit;
+    }
+
+    & button.pager__button[aria-current="page"]:focus { //added due to bootstrap annoying resets, another hour lost wondering why it was not working.
+        outline: 2px solid var(--_focus-border-clr)
+    }
+}

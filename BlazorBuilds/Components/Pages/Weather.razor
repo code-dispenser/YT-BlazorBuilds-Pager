@@ -1,0 +1,133 @@
+﻿@implements IDisposable
+@page "/weather"
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>Standard template weather page with increased enumerable range from 5 to 500, with a filter added above the table and the pager below.</p>
+<p>This video is not about the table only the pager, a prelude to a data-grid component. The filter is used to search across all columns</p>
+
+@if (_forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div style="display:flex; align-items:center;justify-content:end;">
+        <label for="textBoxFilter">Filter records:</label><input id="textBoxFilter" type="text"  autocomplete="off" 
+        @bind-value:get="_filterText" @bind-value:event="oninput" @bind-value:set="HandleOnInput!" />
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in _pagedForecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <Pager AriaPagerLabel="Weather results pager" ItemCount="@_itemCount" ItemsPerPage="5" TotalItemCount="@_forecasts.Length" 
+    DisplaySize="PagerDisplaySize.Large" CurrentPage="@_currentPage" CurrentPageChanged="HandleChangePage" ShowInputBox="true"/>
+}
+
+@code {
+    private WeatherForecast[]?    _forecasts;
+    private List<WeatherForecast> _pagedForecasts = [];
+    private List<WeatherForecast> _filteredItems  = [];
+
+    private System.Timers.Timer _timer = new System.Timers.Timer(250);
+
+    private string _filterText   = String.Empty;
+    private int    _itemCount    = 0;
+    private int    _currentPage  = 1;
+    private int    _itemsPerPage = 5;
+
+    private void HandleChangePage(int requestedPage)
+    {
+        if(false == String.IsNullOrWhiteSpace(_filterText))
+        {
+            _pagedForecasts = _filteredItems!.Skip((requestedPage -1) * _itemsPerPage).Take(_itemsPerPage).ToList();
+        }
+        else
+        {
+            _pagedForecasts = _forecasts!.Skip((requestedPage -1) * _itemsPerPage).Take(_itemsPerPage).ToList();
+        }
+        _currentPage = requestedPage;
+    }
+
+    private void HandleOnInput(string value)
+    {  
+        _timer.Stop();
+        _timer.Start();
+        _filterText = value.Trim();
+    }
+    
+    private void _timer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        _timer.Stop();
+        FilterData(_filterText);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void FilterData(string filterText)
+    {
+        filterText      = filterText.ToLower();
+        _filteredItems  = _forecasts!.Where(a => a.Summary!.ToLower().Contains(filterText)
+                                         || a.TemperatureC.ToString().Contains(filterText)
+                                         || a.TemperatureF.ToString().Contains(filterText)
+                                         || a.Date.ToString().Contains(filterText)
+                                         || _filterText == String.Empty).ToList();
+        _itemCount      = _filteredItems.Count;
+        _pagedForecasts = _filteredItems.Take(5).ToList();
+        _currentPage    = _itemCount > 0 ? 1 : 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate a loading indicator
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        _forecasts = Enumerable.Range(1, 500).Select(index => new WeatherForecast
+        {
+            Date = startDate.AddDays(index),
+            TemperatureC = Random.Shared.Next(-20, 55),
+            Summary = summaries[Random.Shared.Next(summaries.Length)]
+        }).ToArray();
+
+        _itemCount = _forecasts.Length;
+        _currentPage = 1;
+        _pagedForecasts = _forecasts.Take(5).ToList();
+
+        (_timer != null).WhenTrue(() => _timer!.Elapsed += _timer_Elapsed);
+    }
+
+    private class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+
+    public void Dispose()
+    {
+        (_timer != null).WhenTrue(() => _timer!.Dispose());
+        _pagedForecasts.Clear();
+        _forecasts = null;
+    }
+}
