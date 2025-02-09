@@ -12,6 +12,7 @@
             var inputboxKey     = "input-box";
             var nextItemKey     = "next-item";
             var previousItemKey = "previous-item";
+            var compactKey      = "compact-pager";
         }
         @if (true == ShowInputBox)
         {
@@ -46,7 +47,7 @@
 
         @if (DisplaySize == PagerDisplaySize.Compact)
         {
-            <li class="@GlobalValues.Pager_Counter_Class">@_currentPage &nbsp; / &nbsp; @_lastPage</li>
+            <li @key="compactKey" class="@GlobalValues.Pager_Counter_Class">@_currentPage &nbsp; / &nbsp; @_lastPage</li>
         }
         else
         {
@@ -61,7 +62,7 @@
 
                 @if (pageNumber < 1)
                 {
-                    <li @key="@($"page-{pageNumber}")" class="@buttonClasses" aria-label="@_ariaEllipseLabel" aria-disabled="true">&#8230</li>
+                    <li @key="pageNumber" class="@buttonClasses" aria-label="@_ariaEllipseLabel" aria-disabled="true">&#8230</li>
                     continue;
                 }
                 @if (true == isCurrentPage)
