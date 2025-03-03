@@ -10,6 +10,7 @@
     gap: 1rem;
     font-size: var(--fs-label);
     color: var(--control-label-text-clr);
+    min-height: 3rem;
 
     & > *:only-child { //push buttons to the right when there is no information span
         margin-left: auto;
